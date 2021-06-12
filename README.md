@@ -1,4 +1,4 @@
-# Gateway Manager UI and backend
+# Shopping Cart
 This is a sample application to demonstrate shopping cart data model.
 
 
@@ -29,8 +29,7 @@ git clone https://github.com/melanj/shopping-cart.git
 
 ## how to see coverage
 
-Tests can be run using following maven command and test reports are available at 'target/site/jacoco/index.html'
-most scenarios are covered by integration tests and few unit tests also available.
+Tests can be run using following maven command and test reports are available at 'target/site/jacoco/index.html'.
 
 ```bash
 mvn clean test jacoco:report
