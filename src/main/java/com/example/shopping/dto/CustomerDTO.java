@@ -1,41 +1,31 @@
-package com.example.shopping.model;
+package com.example.shopping.dto;
 
 import lombok.Data;
 
-import javax.persistence.*;
-
-
 /**
- * Represents a Customer.
+ * Represents a Customer data transfer object.
  */
-@Entity
 @Data
-public class Customer {
+public class CustomerDTO {
 
     /**
      * The Customer identifier
      */
-    @Id
-    @Column(nullable = false, updatable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * The name of Customer
      */
-    @Column(nullable = false)
     private String name;
 
     /**
      * The address of Customer
      */
-    @Column(nullable = false)
     private String address;
 
     /**
      * The login username of Customer
      */
-    @Column(nullable = false)
     private String username;
 
 }
