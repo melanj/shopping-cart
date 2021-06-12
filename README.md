@@ -9,15 +9,14 @@ This is a sample application to demonstrate shopping cart data model.
 - [x] git client
 
 ## Class diagram
-![Alt text](./images/class_diagram.svg)
 
+### rules
 * A customer can have zero or one shopping carts.
 * A customer can add one or more of each different products to each shopping cart.
 * Every product must have a title, name, price and tax.
 * A shopping cart has a total amount, total VAT and shipment costs.
 
-<img src="./images/class_diagram.svg">
-
+![Alt text](./images/class_diagram.svg)
 
 ## how to run this application
 
