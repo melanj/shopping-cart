@@ -48,7 +48,7 @@ public class Product {
     /**
      * The {@link Category} instance representing the category of the product.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 

@@ -1,6 +1,7 @@
 package com.example.shopping.dto;
 
 import com.example.shopping.model.Product;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
  * Represents a shopping cart item data transfer object.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CartItemDTO {
 
     /**
@@ -34,11 +36,6 @@ public class CartItemDTO {
     /**
      * The {@link Product} instance representing the product of the CartItem.
      */
-    private Product product;
-
-    /**
-     * The {@link ShoppingCartDTO} instance representing the ShoppingCart of the CartItem.
-     */
-    private ShoppingCartDTO cart;
+    private ProductDTO product;
 
 }

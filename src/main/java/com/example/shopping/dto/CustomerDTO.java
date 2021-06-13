@@ -1,11 +1,13 @@
 package com.example.shopping.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 /**
  * Represents a Customer data transfer object.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomerDTO {
 
     /**

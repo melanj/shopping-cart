@@ -1,5 +1,6 @@
 package com.example.shopping.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.util.Set;
  * Represents a Shopping cart data transfer object.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ShoppingCartDTO {
 
     /**
