@@ -1,7 +1,11 @@
 package com.example.shopping;
 
+import com.example.shopping.dto.CartItemDTO;
+import com.example.shopping.dto.ProductDTO;
+import com.example.shopping.dto.ShoppingCartDTO;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
@@ -10,12 +14,14 @@ import org.testng.annotations.Test;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ShoppingApplication.class)
 class ShoppingApplicationTests extends AbstractTestNGSpringContextTests {
 
+    public static final String LOCALHOST = "http://localhost:";
     @LocalServerPort
     private int randomServerPort;
     private RestTemplate restTemplate;
@@ -32,77 +38,100 @@ class ShoppingApplicationTests extends AbstractTestNGSpringContextTests {
         headersUser2.setBasicAuth("user2", "user2Pass");
     }
 
-    @Test
+    @Test(priority = 0)
     public void testBootstrap() throws Exception {
-        URI uri = new URI("http://localhost:" + randomServerPort + "/actuator");
+        URI uri = new URI(LOCALHOST + randomServerPort + "/actuator");
         ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
         assertEquals(200, result.getStatusCodeValue());
     }
 
-    @Test
+    @Test(priority = 1)
     public void testPurchaseSingleItemAndGetTotal() throws Exception {
-        URI uri = new URI("http://localhost:" + randomServerPort + "/api/mycart");
+        // doing an API call to get the content of the cart associated with current session (user1)
+        URI uri = new URI(LOCALHOST + randomServerPort + "/api/mycart");
         HttpEntity<String> request = new HttpEntity<>(headersUser1);
         ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
         assertEquals(200, result.getStatusCodeValue());
-        setCookie(result, headersUser1);
+        setCookie(result, headersUser1); // save the session cookie to use with subsequent requests.
 
-        String item1 = "{\n" +
-                "    \"quantity\": 2,\n" +
-                "    \"product\": {\n" +
-                "      \"id\": 97\n" +
-                "    }\n" +
-                "  }\n";
-        uri = new URI("http://localhost:" + randomServerPort + "/api/mycart/items");
+        // doing an API call to get products and select a random product
+        List<ProductDTO> products = getProducts(headersUser1);
+        Random random = new Random();
+        ProductDTO product = products.stream().skip(random.nextInt(products.size())).findFirst().orElseThrow();
 
-        request = new HttpEntity<>(item1, headersUser1);
-        result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        CartItemDTO item = new CartItemDTO();
+        item.setQuantity((long) (random.nextInt(5) +1));
+        item.setProduct(product);
+
+        // doing an API call to add the select product into cart.
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart/items");
+        HttpEntity<CartItemDTO> itemAddRequest = new HttpEntity<>(item, headersUser1);
+        result = restTemplate.exchange(uri, HttpMethod.POST, itemAddRequest, String.class);
         assertEquals(201, result.getStatusCodeValue());
 
-        uri = new URI("http://localhost:" + randomServerPort + "/api/mycart");
+        // doing an API call to get the content of the cart
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart");
         request = new HttpEntity<>(headersUser1);
-        result = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
-        assertEquals(200, result.getStatusCodeValue());
-        System.out.println("test1 =" + result.getBody());
+        ResponseEntity<ShoppingCartDTO> cartResponse = restTemplate.exchange(uri,
+                HttpMethod.GET, request, ShoppingCartDTO.class);
+        assertEquals(200, cartResponse.getStatusCodeValue());
 
+        // doing an API call to clear the cart.
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart");
+        request = new HttpEntity<>(headersUser1);
+        result = restTemplate.exchange(uri, HttpMethod.DELETE, request, String.class);
+        assertEquals(204, result.getStatusCodeValue());
     }
 
-    @Test
+
+    @Test(priority = 2)
     public void testPurchaseMultipleItemsAndGetTotal() throws Exception {
-        URI uri = new URI("http://localhost:" + randomServerPort + "/api/mycart");
+        // doing an API call to get the content of the cart associated with current session (user2)
+        URI uri = new URI(LOCALHOST + randomServerPort + "/api/mycart");
         HttpEntity<String> request = new HttpEntity<>(headersUser2);
         ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
         assertEquals(200, result.getStatusCodeValue());
         setCookie(result, headersUser2);
 
-        String item1 = "{\n" +
-                "    \"quantity\": 3,\n" +
-                "    \"product\": {\n" +
-                "      \"id\": 30\n" +
-                "    }\n" +
-                "  }\n";
-        uri = new URI("http://localhost:" + randomServerPort + "/api/mycart/items");
+        // doing an API call to get products and select a random product
+        List<ProductDTO> products = getProducts(headersUser2);
+        Random random = new Random();
+        ProductDTO product1 = products.stream().skip(random.nextInt(products.size())).findFirst().orElseThrow();
 
-        request = new HttpEntity<>(item1, headersUser2);
-        result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        CartItemDTO item1 = new CartItemDTO();
+        item1.setQuantity((long) (random.nextInt(5) +1));
+        item1.setProduct(product1);
+
+        // doing an API call to add the select product into cart.
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart/items");
+        HttpEntity<CartItemDTO> itemAddRequest = new HttpEntity<>(item1, headersUser2);
+        result = restTemplate.exchange(uri, HttpMethod.POST, itemAddRequest, String.class);
         assertEquals(201, result.getStatusCodeValue());
 
-        String item2 = "{\n" +
-                "    \"quantity\": 5,\n" +
-                "    \"product\": {\n" +
-                "      \"id\": 60\n" +
-                "    }\n" +
-                "  }\n";
+        // Select another random product
+        ProductDTO product2 = products.stream().skip(random.nextInt(products.size())).findFirst().orElseThrow();
 
-        request = new HttpEntity<>(item2, headersUser2);
-        result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        CartItemDTO item2 = new CartItemDTO();
+        item2.setQuantity((long) (random.nextInt(5) +1));
+        item2.setProduct(product2);
+
+        // doing an API call to add the select product into cart.
+        itemAddRequest = new HttpEntity<>(item2, headersUser2);
+        result = restTemplate.exchange(uri, HttpMethod.POST, itemAddRequest, String.class);
         assertEquals(201, result.getStatusCodeValue());
 
-        uri = new URI("http://localhost:" + randomServerPort + "/api/mycart");
+        // doing an API call to get the content of the cart
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart");
         request = new HttpEntity<>(headersUser2);
-        result = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
-        assertEquals(200, result.getStatusCodeValue());
-        System.out.println("Test2 =" + result.getBody());
+        ResponseEntity<ShoppingCartDTO> cartResponse = restTemplate.exchange(uri,
+                HttpMethod.GET, request, ShoppingCartDTO.class);
+        assertEquals(200, cartResponse.getStatusCodeValue());
+
+        // doing an API call to submit the cart to process.
+        uri = new URI(LOCALHOST + randomServerPort + "/api/mycart/submit");
+        request = new HttpEntity<>(headersUser1);
+        result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        assertEquals(201, result.getStatusCodeValue());
     }
 
     private static void setCookie(ResponseEntity<String> result, HttpHeaders headers) {
@@ -110,6 +139,16 @@ class ShoppingApplicationTests extends AbstractTestNGSpringContextTests {
         assertNotNull(cookie);
         assertFalse(cookie.isEmpty());
         headers.set("Cookie", cookie.get(0));
+    }
+
+    private List<ProductDTO> getProducts(HttpHeaders headers) throws Exception {
+        URI uri = new URI(LOCALHOST + randomServerPort + "/api/products");
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<DummyPageImpl<ProductDTO>> result = restTemplate.exchange(uri, HttpMethod.GET, request, new ParameterizedTypeReference<>() {
+        });
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        return result.getBody().getContent();
     }
 
 }

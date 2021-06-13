@@ -1,3 +1,6 @@
+logging:
+  level:
+    org.meanbean.factories: ERROR
 spring:
 #  main:
 #    web-application-type: none

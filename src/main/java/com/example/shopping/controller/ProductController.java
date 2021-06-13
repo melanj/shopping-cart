@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+/**
+ * REST controller implementation to provide REST API for product management.
+ */
 @RestController
 @RequestMapping(value = "/api/products", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProductController {
@@ -27,10 +30,17 @@ public class ProductController {
     @Resource
     private ModelMapper modelMapper;
 
-
-    @GetMapping("/")
+    /**
+     * Returns a {@link Page} of {@link ProductDTO} list  meeting the paging restriction
+     * provided in the {@code Pageable}  object.
+     *
+     * @param pageable Pageable object
+     * @return a page of products
+     */
+    @GetMapping
     public Page<ProductDTO> getProducts(final Pageable pageable) {
         Page<Product> entities = productRepository.findAll(pageable);
+        LOG.debug("listing products based on the paging restriction");
         return entities.map(product -> modelMapper.map(product, ProductDTO.class));
     }
 
