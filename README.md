@@ -38,6 +38,17 @@ git clone https://github.com/melanj/shopping-cart.git
 mvn spring-boot:run
 ```
 
+or build a docker image and run it.
+```bash
+spring-boot:build-image
+```
+
+run it.
+```bash
+docker run -it -p8080:8080 --name shopping-cart  shopping:0.0.1-SNAPSHOT
+```
+
+Swagger API specifications can be accessible via a browser using http://localhost:8080/swagger-ui.html
 
 ## how to see coverage
 
