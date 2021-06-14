@@ -4,7 +4,7 @@ This is a sample application to demonstrate shopping cart data model.
 
 ## Prerequisites
 
-- [x] JDK 8 or later 
+- [x] JDK 11 or later 
 - [x] Apache Maven 3.5 or later 
 - [x] git client
 
