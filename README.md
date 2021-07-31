@@ -40,7 +40,7 @@ mvn spring-boot:run
 
 or build a docker image and run it.
 ```bash
-spring-boot:build-image
+mvn spring-boot:build-image
 ```
 
 run it.
